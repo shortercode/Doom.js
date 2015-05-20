@@ -1,0 +1,27 @@
+{
+  "name": "Doom",
+  "version": "0.1.0",
+  "description": "Simple DOM utility library for web apps",
+  "main": "Doom.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/shortercode/Doom.js"
+  },
+  "keywords": [
+    "dom",
+    "client",
+    "app",
+    "doom",
+    "shortercode"
+  ],
+  "author": "Iain Shorter",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/shortercode/Doom.js/issues"
+  },
+  "homepage": "https://github.com/shortercode/Doom.js"
+}
