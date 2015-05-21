@@ -6,6 +6,10 @@
 
 var fs = require('fs');
 
+var buildfiles = {
+	'src/Doom.js' : 'build/Doom.js'
+};
+
 var precompile = (function(){
     
     var definitions = {};
@@ -18,13 +22,17 @@ var precompile = (function(){
         import: function( filename ){
             
             if( !bLocked ){
-                var filebuffer = fs.readFileSync( filename );
-                
-                buildLog("Importing \""+filename+"\" into \""+activeFile+"\"");
+				try{
+					var filebuffer = fs.readFileSync( filename );
 
-                if( filebuffer ){
-                    readFile( filebuffer, filename );
-                }
+					buildLog("Importing \""+filename+"\" into \""+activeFile+"\"");
+
+					if( filebuffer ){
+						readFile( filebuffer, filename );
+					}
+				}catch(e){
+					buildLog("Failed to import \""+filename+"\" into \""+activeFile+"\"");
+				}
             }
         },
         
@@ -49,6 +57,13 @@ var precompile = (function(){
             }
             
         },
+		
+		console: function( key, value ){
+			if( !bLocked ){
+                output.push( "console."+key+"( "+value+" );" );
+                buildLog("Adding console output \""+key+"\" as \""+value+"\"");
+            }
+		},
 
         if: function( key, value ){
             if( !bLocked ){
@@ -123,5 +138,12 @@ var precompile = (function(){
 }());
 
 (function(){
-    fs.writeFileSync('build/Doom.js', precompile('src/Doom.js'));
+	for(var key in buildfiles){
+		try{
+			fs.writeFileSync( buildfiles[key], precompile(key) );	
+		}catch(e){
+			buildLog("Failed to compile \""+key+"\"");
+			console.log(e);
+		}
+	}
 }());
