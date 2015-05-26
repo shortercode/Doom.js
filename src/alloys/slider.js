@@ -1,11 +1,13 @@
 // @define sliderversion "0.1.0"
-// @comment commentstart
+/*//====//====//====//====//====//====//====//====//====//====//====//====//====//====//
+
 Slider Alloy for Doom.js
 Version: 
 // @comment sliderversion
 Written by: Iain Shorter
 MIT License
-// @comment commentend
+
+//====//====//====//====//====//====//====//====//====//====//====//====//====//====//*/
 
 (function(){ //slider widget definition
     function Slider(properties){
