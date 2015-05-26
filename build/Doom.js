@@ -1,12 +1,16 @@
 /*//====//====//====//====//====//====//====//====//====//====//====//====//====//====//
 Doom.js
 Version: 
-0.1.0
+0.2.0
 Written by: Iain Shorter
 MIT License
 //====//====//====//====//====//====//====//====//====//====//====//====//====//====//*/
 
-var Doom = (function(){                
+var Doom = (function(){  
+    
+    var head = document.getElementsByTagName('head')[0];
+    var alloys = {};
+    
     function createElement(obj){
         var i;
         var element;
@@ -171,8 +175,8 @@ var Doom = (function(){
 
         return element;
     }
-	
-	function removeElement( element ){
+    
+    function removeElement( element ){
 		if(element.parentNode)
 			element.parentNode.removeChild(element);
 		return element;
@@ -195,14 +199,45 @@ var Doom = (function(){
         else
             alloys[key] = constructor;
     }
-
-    var alloys = {};
+    
+    function GET(path,success,error){
+        var node = document.createElement('script');
+        node.done = false;
+        node.success = success || false;
+        node.failure = error || false;
+        node.src = path;
+        node.onerror = GET_ERROR;
+        node.onload = node.onreadystatechange = GET_SUCCESS;
+        head.appendChild(node);
+        return node;
+    }
+    
+    function GET_ERROR(){
+        if(this.done)return;
+        if(this.failure)this.failure();
+        this.done = true;
+        this.onload = this.onreadystatechange = this.onerror = null;
+        this.parentNode.removeChild(this);
+        this.success = this.failure = null;
+    }
+    
+    function GET_SUCCESS(){
+        if(this.done)return;
+        if (!this.readyState || this.readyState == 4 || this.readyState == 'loaded'){
+            if(this.success)this.success();
+            this.done = true;
+            this.onload = this.onreadystatechange = this.onerror = null;
+            this.parentNode.removeChild(this);
+            this.success = this.failure = null;
+        }
+    }
 
     return {
         create: createElement,
         modify: modifyElement,
         search: searchElement,
-		remove: removeElement,
+        remove: removeElement,
+        access: GET,
         define: defineAlloy
     };
 }());

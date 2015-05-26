@@ -1,4 +1,4 @@
-// @define version "0.1.0"
+// @define version "0.2.0"
 // @define commentstart "/*//====//====//====//====//====//====//====//====//====//====//====//====//====//====//"
 // @define commentend "//====//====//====//====//====//====//====//====//====//====//====//====//====//====//*/"
 // @comment commentstart
@@ -9,7 +9,11 @@ Written by: Iain Shorter
 MIT License
 // @comment commentend
 
-var Doom = (function(){                
+var Doom = (function(){  
+    
+    var head = document.getElementsByTagName('head')[0];
+    var alloys = {};
+    
     function createElement(obj){
         var i;
         var element;
@@ -106,9 +110,80 @@ var Doom = (function(){
         }
     }
 
-    function modifyElement(){
+    function modifyElement( obj ){
+		
+		var element = obj.element;
+		
+		if(!element)
+			throw "Element not defined ";
+		
+		for(i in obj){
+            switch(i){
 
+                case 'tagName': 
+                case 'alloyName':
+                case 'alloyProperties':
+                case 'copies':
+                    break; //ignore
+
+                case 'parentNode':
+                    obj[i].appendChild(element);
+                    break;
+					
+				case  'addClass':
+					element.classList.add(obj[i]);
+					break;
+					
+				case 'toggleClass':
+					element.classList.toggle(obj[i]);
+					break;
+
+				case 'removeClass':
+					element.classList.remove(obj[i]);
+					break;
+
+                case 'style':
+                    if(typeof obj.style === 'object'){
+                        for( i in obj.style ){
+                            element.style[i] = obj.style[i];
+                        }
+                    }else if( typeof obj.style === 'string' ){
+                        element.style.cssText += obj.style;
+                    }else{
+                        throw 'Style TypeError - '+ typeof obj.style;
+                    }
+                    break;
+
+                case 'childNodes':
+                    for(i = 0; i < obj.childNodes.length; i++){
+                        if(obj.childNodes[i] instanceof HTMLElement){ 
+                            //child is already element
+                            element.appendChild(obj.childNodes[i]);
+                        }else if(typeof obj.childNodes[i] == 'object'){ 
+                            //child is an element stub
+                            obj.childNodes[i].parentNode = element;
+                            obj.childNodes[i] = createElement(obj.childNodes[i]);
+                        }else{
+                            throw 'Child '+i+' TypeError - '+ typeof obj.childNodes[i];
+                        }
+                    }
+                    break;
+
+                default:
+                    element[i] = obj[i];
+                    break;
+
+            }
+        }
+
+        return element;
     }
+    
+    function removeElement( element ){
+		if(element.parentNode)
+			element.parentNode.removeChild(element);
+		return element;
+	}
 
     function createAlloy( key, properties ){
         if(alloys[key]){
@@ -127,13 +202,45 @@ var Doom = (function(){
         else
             alloys[key] = constructor;
     }
-
-    var alloys = {};
+    
+    function GET(path,success,error){
+        var node = document.createElement('script');
+        node.done = false;
+        node.success = success || false;
+        node.failure = error || false;
+        node.src = path;
+        node.onerror = GET_ERROR;
+        node.onload = node.onreadystatechange = GET_SUCCESS;
+        head.appendChild(node);
+        return node;
+    }
+    
+    function GET_ERROR(){
+        if(this.done)return;
+        if(this.failure)this.failure();
+        this.done = true;
+        this.onload = this.onreadystatechange = this.onerror = null;
+        this.parentNode.removeChild(this);
+        this.success = this.failure = null;
+    }
+    
+    function GET_SUCCESS(){
+        if(this.done)return;
+        if (!this.readyState || this.readyState == 4 || this.readyState == 'loaded'){
+            if(this.success)this.success();
+            this.done = true;
+            this.onload = this.onreadystatechange = this.onerror = null;
+            this.parentNode.removeChild(this);
+            this.success = this.failure = null;
+        }
+    }
 
     return {
         create: createElement,
         modify: modifyElement,
         search: searchElement,
+        remove: removeElement,
+        access: GET,
         define: defineAlloy
     };
 }());
