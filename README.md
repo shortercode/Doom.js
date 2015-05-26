@@ -4,7 +4,7 @@
 
 A simple library for manipulating HTML elements with an awesomely simple syntax and no dependancies.
 
-* create an element? *
+*create an element?*
 ```
 Doom.create({
     tagName:'div',
@@ -24,7 +24,7 @@ Doom.create({
 ```  
 Setting the parent node property will append your new element to the document.
 
-``
+```
 Doom.create({
     tagName:'div',
     innerHTML:'Hello World',
@@ -34,7 +34,7 @@ Doom.create({
 
 Child nodes can be recursivly created as well!
 
-``
+```
 Doom.create({
     tagName:'div',
     parentNode:document.body,
