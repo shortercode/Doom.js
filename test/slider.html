@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+        <title>Slider Test</title>
+        <script src="../build/Doom.js"></script>
+    </head>
+    <body>
+        <script>
+            var slider = Doom.create({
+                alloyName:'slider',
+                alloyProperties:{
+                    color:'rgba(255,0,255,0.5)',
+                    tabs: 5
+                },
+                parentNode:document.body
+            });
+            Doom.modify({
+                element: slider.alloy.tabs[0],
+                innerHTML: "Tab"
+            });
+            Doom.modify({
+                element: slider.alloy.tabs[1],
+                innerHTML: "Tab"
+            });
+            Doom.modify({
+                element: slider.alloy.tabs[2],
+                innerHTML: "Tab"
+            });
+            Doom.modify({
+                element: slider.alloy.tabs[3],
+                innerHTML: "Tab"
+            });
+            Doom.modify({
+                element: slider.alloy.tabs[4],
+                innerHTML: "Tab"
+            });
+        </script>
+    </body>
+</html>
