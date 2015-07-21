@@ -1,5 +1,5 @@
 // @define version "0.2.0"
-/*//====//====//====//====//====//====//====//====//====//====//====//====//====//====//
+/*/====/====/====/====/====/====/====/====/====/====/====/====/====/====/
 
 Doom.js Library
 Version: 
@@ -7,12 +7,16 @@ Version:
 Written by: Iain Shorter
 MIT License
 
-//====//====//====//====//====//====//====//====//====//====//====//====//====//====//*/
+/====/====/====/====/====/====/====/====/====/====/====/====/====/====/*/
 
-var Doom = (function(){  
+window.Doom = (function(){  
+
+	"use strict";
     
-    var head = document.getElementsByTagName('head')[0];
+    var head = document.head;
     var alloys = {};
+    
+    //====/====/====/====/====/====/====/====/====/====/====/====/====/====/
     
     function createElement(obj){
         var i;
@@ -51,6 +55,18 @@ var Doom = (function(){
                 case 'alloyProperties':
                 case 'copies':
                     break; //ignore
+                    
+                case 'ontap':
+                	addTouch(element, 'tap', obj.ontap);
+                	break;
+                	
+                case 'onswipe':
+                	addTouch(element, 'swipe', obj.onswipe);
+                	break;
+                	
+                case 'onpan':
+                	addTouch(element, 'pan', obj.onpan);
+                	break;
 
                 case 'parentNode':
                     obj[i].appendChild(element);
@@ -113,7 +129,7 @@ var Doom = (function(){
     function modifyElement( obj ){
 		
 		var element = obj.element;
-		
+		var i;
 		if(!element)
 			throw "Element not defined ";
 		
@@ -184,6 +200,8 @@ var Doom = (function(){
 			element.parentNode.removeChild(element);
 		return element;
 	}
+	
+	//====/====/====/====/====/====/====/====/====/====/====/====/====/====/
 
     function createAlloy( key, properties ){
         if(alloys[key]){
@@ -191,7 +209,7 @@ var Doom = (function(){
             alloy.element.alloy = alloy;
             return alloy.element;
         }else{
-            throw "Construction Error, alloy element does not exist";   
+            throw "Construction Error, alloy does not exist";   
         }
     }
 
@@ -203,19 +221,21 @@ var Doom = (function(){
             alloys[key] = constructor;
     }
     
-    function GET(path,success,error){
+	//====/====/====/====/====/====/====/====/====/====/====/====/====/====/
+    
+    function getScript(path,success,error){
         var node = document.createElement('script');
         node.done = false;
         node.success = success || false;
         node.failure = error || false;
         node.src = path;
-        node.onerror = GET_ERROR;
-        node.onload = node.onreadystatechange = GET_SUCCESS;
+        node.onerror = getScript_error;
+        node.onload = node.onreadystatechange = getScript_success;
         head.appendChild(node);
         return node;
     }
     
-    function GET_ERROR(){
+    function getScript_error(){
         if(this.done)return;
         if(this.failure)this.failure();
         this.done = true;
@@ -224,7 +244,7 @@ var Doom = (function(){
         this.success = this.failure = null;
     }
     
-    function GET_SUCCESS(){
+    function getScript_success(){
         if(this.done)return;
         if (!this.readyState || this.readyState == 4 || this.readyState == 'loaded'){
             if(this.success)this.success();
@@ -234,15 +254,269 @@ var Doom = (function(){
             this.success = this.failure = null;
         }
     }
+    
+	//====/====/====/====/====/====/====/====/====/====/====/====/====/====/
+	
+	function addTouch(element, event , fn) {
+		if(!element.touches) {
+			new TouchListener(element);
+		}
+		element.touches.on(event, fn);
+	}
+    
+	function TouchListener(element) {
+		var that = this,
+			event = null,
+			style = element.style,
+			config = {
+				TAP_MAXTIME: 500,
+				TAP_MAXDELTA: 20,
+				PAN_MINDELTA: 20,
+				SWIPE_MAXTIME: 300,
+				SWIPE_MINSPEED: 1
+			},
+			pos = {
+				x: null,
+				y: null,
+				t: null
+			},
+			motion = {
+				pos: pos,
+				event: null,
+				preventDefault: function() {
+					event && event.preventDefault && event.preventDefault();
+				},
+				stopProgagation: function() {
+					event && event.stopProgagation && event.stopProgagation();
+				}
+			};
+	
+		function clear() {
+		
+			event = null;
+			
+			pos.x = null;
+			pos.y = null;
+			pos.t = null;
+			
+			motion.event = null;
+			
+			motion.pos_t_start = null;
+			motion.pos_t_previous = null;
+			motion.pos_t_end = null;
+			motion.pos_t_delta = null;
+			
+			motion.pos_x_start = null;
+			motion.pos_x_previous = null;
+			motion.pos_x_end = null;
+			motion.pos_x_delta = null;
+			
+			motion.pos_y_start = null;
+			motion.pos_y_previous = null;
+			motion.pos_y_end = null;
+			motion.pos_y_delta = null;
+			
+			motion.pos_u_delta = null;
+			
+			motion.vel_x = null;
+			motion.vel_y = null;
+			motion.vel_u = null;
+			
+			motion.dist_x = null;
+			motion.dist_y = null;
+			motion.dist_u = null;
+			
+			motion.direction = null;
+		
+		}
+	
+		function getpos() {
+			pos.x = event.pageX || event.changedTouches[0].pageX;
+			pos.y = event.pageY || event.changedTouches[0].pageY;
+			pos.t = event.timeStamp;
+		}
+	
+		function start(e) {
+			if (!event) {
+				motion.event = event = e;
+				getpos();
 
+				motion.pos_t_start = pos.t;
+				motion.pos_x_start = pos.x;
+				motion.pos_y_start = pos.y;
+
+				motion.pos_t_delta = 0;
+				motion.pos_x_delta = 0;
+				motion.pos_y_delta = 0;
+				motion.pos_u_delta = 0;
+			
+				that.event('touchstart', motion);
+			}
+		}
+	
+		function move(e) {
+			if (event) {
+			
+				var x_delta, y_delta;
+			
+				motion.event = event = e;
+			
+				motion.pos_t_previous = pos.t;
+				motion.pos_x_previous = pos.x;
+				motion.pos_y_previous = pos.y;
+			
+				getpos();
+			
+				motion.pos_t_delta = pos.t - motion.pos_t_start;
+			
+				x_delta = pos.x - motion.pos_x_previous;
+				y_delta = pos.y - motion.pos_y_previous;
+			
+				motion.pos_x_delta += Math.abs(x_delta);
+				motion.pos_y_delta += Math.abs(y_delta);
+				motion.pos_u_delta += Math.sqrt(x_delta * x_delta + y_delta * y_delta);
+			
+				motion.dist_x = pos.x - motion.pos_x_start;
+				motion.dist_y = pos.y - motion.pos_y_start;
+				motion.dist_u = Math.sqrt(motion.dist_x * motion.dist_x + motion.dist_y * motion.dist_y);
+			
+				motion.vel_x = motion.dist_x / motion.pos_t_delta;
+				motion.vel_y = motion.dist_y / motion.pos_t_delta;
+				motion.vel_u = motion.dist_u / motion.pos_t_delta;
+			
+				that.event('touchmove', motion);
+			
+				if (motion.pos_u_delta > config.PAN_MINDELTA) { // Pan Recognition Logic
+					if (Math.abs(motion.dist_x) > Math.abs(motion.dist_y)) {
+						motion.direction = motion.dist_x > 0 ? "RIGHT" : "LEFT";
+					} else {
+						motion.direction = motion.dist_y > 0 ? "DOWN" : "UP";
+					}
+					that.event('pan', motion);
+				}
+			}
+		}
+	
+		function end(e) {
+			if (event) {
+			
+				var x_delta, y_delta;
+			
+				motion.event = event = e;
+			
+				getpos();
+			
+				motion.pos_t_end = pos.t;
+				motion.pos_x_end = pos.x;
+				motion.pos_y_end = pos.y;
+			
+				motion.pos_t_delta = pos.t - motion.pos_t_start;
+			
+				x_delta = motion.pos_x_previous === null ? 0 : pos.x - motion.pos_x_previous;
+				y_delta = motion.pos_y_previous === null ? 0 : pos.y - motion.pos_y_previous;
+			
+				motion.pos_x_delta += Math.abs(x_delta);
+				motion.pos_y_delta += Math.abs(y_delta);
+				motion.pos_u_delta += Math.sqrt(x_delta * x_delta + y_delta * y_delta);
+			
+				motion.dist_x = pos.x - motion.pos_x_start;
+				motion.dist_y = pos.y - motion.pos_y_start;
+				motion.dist_u = Math.sqrt(motion.dist_x * motion.dist_x + motion.dist_y * motion.dist_y);
+			
+				motion.vel_x = motion.dist_x / motion.pos_t_delta;
+				motion.vel_y = motion.dist_y / motion.pos_t_delta;
+				motion.vel_u = motion.dist_u / motion.pos_t_delta;
+				
+				console.log();
+			
+				that.event('touchend', motion);
+			
+				if (event.type !== 'mouseleave' && event.type !== 'touchleave' && motion.pos_t_delta < config.TAP_MAXTIME && motion.pos_u_delta < config.TAP_MAXDELTA) { // Tap Recognition Logic
+					that.event('tap', motion);
+				}
+			
+				if (motion.pos_t_delta < config.SWIPE_MAXTIME && motion.vel_u > config.SWIPE_MINSPEED) {
+					if (Math.abs(motion.dist_x) > Math.abs(motion.dist_y)) {
+						motion.direction = motion.dist_x > 0 ? "RIGHT" : "LEFT";
+					} else {
+						motion.direction = motion.dist_y > 0 ? "DOWN" : "UP";
+					}
+					that.event('swipe', motion);
+				}
+			
+				clear();
+			}
+		}
+	
+		function detach() {
+			element.removeEventListener('touchstart', start, false);
+			element.removeEventListener('mousedown', start, false);
+			element.removeEventListener('touchmove', move, false);
+			element.removeEventListener('mousemove', move, false);
+			element.removeEventListener('touchleave', end, false);
+			element.removeEventListener('mouseleave', end, false);
+			document.body.removeEventListener('touchcancel', end, false);
+			document.body.removeEventListener('mouseup', end, false);
+			document.body.removeEventListener('touchend', end, false);
+		}
+	
+		function attach() {
+			element.addEventListener('touchstart', start, false);
+			element.addEventListener('mousedown', start, false);
+			element.addEventListener('touchmove', move, false);
+			element.addEventListener('mousemove', move, false);
+			element.addEventListener('touchleave', end, false);
+			element.addEventListener('mouseleave', end, false);
+			document.body.addEventListener('touchcancel', end, false);
+			document.body.addEventListener('mouseup', end, false);
+			document.body.addEventListener('touchend', end, false);
+		}
+		
+		style.webkitUserSelect = 'none';
+		style.mozUserSelect = 'none';
+		style.msUserSelect = 'none';
+		style.webkitUserDrag = 'none';
+		//style.touchAction = 'none';
+		style.msTouchAction = 'none';
+		style.webkitTapHighlightColor = 'rgba(0,0,0,0)';
+	
+		clear();
+		attach();
+		
+		this.__eventlist__ = {};
+		this.detach = detach;
+		this.attach = attach;
+		this.element = element;
+		this.CONFIG = config;
+		
+		element.touches = this;
+	}
+
+	TouchListener.prototype = {
+		on: function (event, func) {
+			this.__eventlist__[event.toLowerCase()] = func;
+		},
+		event: function (event, arg) {
+			if (typeof (this.__eventlist__[event]) === 'function') {
+				try {
+					this.__eventlist__[event].call(this, arg);
+				}
+				catch (error) {
+					console.warn(error);
+				}
+			}
+		}
+	};
+	
+	//====/====/====/====/====/====/====/====/====/====/====/====/====/====/
+	
     return {
         create: createElement,
         modify: modifyElement,
         search: searchElement,
         remove: removeElement,
-        access: GET,
-        define: defineAlloy
+        script: getScript,
+        define: defineAlloy,
+        touch: addTouch
     };
 }());
-
-// @import src/alloys/slider.js
