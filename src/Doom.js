@@ -1,13 +1,16 @@
-// @define version "0.2.0"
-/*/====/====/====/====/====/====/====/====/====/====/====/====/====/====/
+/*
 
 Doom.js Library
-Version: 
-// @comment version
-Written by: Iain Shorter
-MIT License
+Version: 0.3.0
+Copyright (c) 2015 Iain Shorter 
+Licensed under MIT license
 
-/====/====/====/====/====/====/====/====/====/====/====/====/====/====/*/
+Javascript framework to simply high level JS -> DOM interaction including:
+- Touch gestures
+- Tree based multi node creation
+- Hybrid JS/HTML element definition and creation
+
+*/
 
 window.Doom = (function(){  
 
@@ -111,17 +114,17 @@ window.Doom = (function(){
 
     function searchElement(selector, parent){
         parent = parent || document; //if no element selected then use document
-        switch(name[0]){
+        switch(selector[0]){
             case '.': // class
-                return parent.getElementsByClassName(name.substr(1));
+                return parent.getElementsByClassName(selector.substr(1));
                 break;
             case '#':
-                return parent.getElementById(name.substr(1));
+                return parent.getElementById(selector.substr(1));
                 break;
             case '?':
-                return parent.querySelectorAll(name.substr(1));
+                return parent.querySelectorAll(selector.substr(1));
             default:
-                return parent.getElementsByTagName(name);
+                return parent.getElementsByTagName(selector);
                 break;
         }
     }
@@ -141,12 +144,24 @@ window.Doom = (function(){
                 case 'alloyProperties':
                 case 'copies':
                     break; //ignore
+                    
+            	case 'ontap':
+                	addTouch(element, 'tap', obj.ontap);
+                	break;
+                	
+                case 'onswipe':
+                	addTouch(element, 'swipe', obj.onswipe);
+                	break;
+                	
+                case 'onpan':
+                	addTouch(element, 'pan', obj.onpan);
+                	break;
 
                 case 'parentNode':
                     obj[i].appendChild(element);
                     break;
 					
-				case  'addClass':
+				case 'addClass':
 					element.classList.add(obj[i]);
 					break;
 					
@@ -169,8 +184,18 @@ window.Doom = (function(){
                         throw 'Style TypeError - '+ typeof obj.style;
                     }
                     break;
+                    
+                case 'innerHTML':
+                	if(element[i] !== obj[i]) {
+                		element[i] = obj[i];
+                	}
+                	break;
 
                 case 'childNodes':
+                	while (element.firstChild) {
+					   element.removeChild(element.firstChild);
+					}
+					
                     for(i = 0; i < obj.childNodes.length; i++){
                         if(obj.childNodes[i] instanceof HTMLElement){ 
                             //child is already element
@@ -272,7 +297,7 @@ window.Doom = (function(){
 				TAP_MAXTIME: 500,
 				TAP_MAXDELTA: 20,
 				PAN_MINDELTA: 20,
-				SWIPE_MAXTIME: 300,
+				SWIPE_MAXTIME: 400,
 				SWIPE_MINSPEED: 1
 			},
 			pos = {
