@@ -1,11 +1,11 @@
 {
   "name": "Doom",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "Simple DOM utility library for web apps",
   "main": "Doom.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node build.js"
+    "start": "sh build.sh"
   },
   "repository": {
     "type": "git",
