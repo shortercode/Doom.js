@@ -60,3 +60,21 @@ Doom.create({
     ]
 });
 ``` 
+
+Support for touch events? Yup.
+
+```
+Doom.create({
+    tagName:'div',
+    innerHTML:'Click me',
+    ontap: function(){
+        this.innerHTML = 'Ouch! Why did you click me? ;(';
+    },
+    onswipe: function(){
+    
+    },
+    onpan: function(){
+    
+    }
+});
+``` 
