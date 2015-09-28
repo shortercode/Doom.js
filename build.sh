@@ -1,0 +1,1 @@
+java -jar compiler.jar --js_output_file=build/Doom.js src/Doom.js
