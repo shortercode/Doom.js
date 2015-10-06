@@ -1,7 +1,7 @@
 /**
  * @preserve
  * Doom.js Library
- * Version: 1.0.0
+ * Version: 1.1.0
  * Copyright (c) 2015 Iain Shorter 
  * Licensed under MIT license
  *
@@ -135,13 +135,17 @@
     function TouchListener(element) {
 		var that = this,
 			event = null,
+            timer = null,
 			style = element.style,
 			config = {
 				TAP_MAXTIME: 500,
 				TAP_MAXDELTA: 20,
 				PAN_MINDELTA: 20,
+                HOLD_MINTIME: 1000,
+                HOLD_MAXDELTA: 20,
 				SWIPE_MAXTIME: 400,
-				SWIPE_MINSPEED: 1
+				SWIPE_MINSPEED: 1,
+                END_ON_LEAVE: false
 			},
 			pos = {
 				x: null,
@@ -164,6 +168,7 @@
 			pos.y = null;
 			pos.t = null;
 			motion.event = null;
+            motion.gesture = null;
 			motion.pos_t_start = null;
 			motion.pos_t_previous = null;
 			motion.pos_t_end = null;
@@ -184,6 +189,8 @@
 			motion.dist_y = null;
 			motion.dist_u = null;
 			motion.direction = null;
+            clearTimeout(timer);
+            timer = null;
 		}
 		function getpos() {
 			pos.x = event.pageX || event.changedTouches[0].pageX;
@@ -201,6 +208,7 @@
 				motion.pos_x_delta = 0;
 				motion.pos_y_delta = 0;
 				motion.pos_u_delta = 0;
+                timer = setTimeout(timeout, config.HOLD_MINTIME);
 				that.event('touchstart', motion);
 			}
 		}
@@ -227,9 +235,13 @@
 				that.event('touchmove', motion);
 				if (motion.pos_u_delta > config.PAN_MINDELTA) { // Pan Recognition Logic
 					if (Math.abs(motion.dist_x) > Math.abs(motion.dist_y)) {
-						motion.direction = motion.dist_x > 0 ? "RIGHT" : "LEFT";
+						motion.direction = x_delta > 0 ? 'RIGHT' : 'LEFT';
+                        that.event('pan' + motion.direction.toLowerCase(), motion);
+                        that.event('pan' + 'horizontal', motion);
 					} else {
-						motion.direction = motion.dist_y > 0 ? "DOWN" : "UP";
+						motion.direction = y_delta > 0 ? 'DOWN' : 'UP';
+                        that.event('pan' + motion.direction.toLowerCase(), motion);
+                        that.event('pan' + 'vertical', motion);
 					}
 					that.event('pan', motion);
 				}
@@ -262,22 +274,45 @@
 				}
 				if (motion.pos_t_delta < config.SWIPE_MAXTIME && motion.vel_u > config.SWIPE_MINSPEED) {
 					if (Math.abs(motion.dist_x) > Math.abs(motion.dist_y)) {
-						motion.direction = motion.dist_x > 0 ? "RIGHT" : "LEFT";
+						motion.direction = motion.dist_x > 0 ? 'RIGHT' : 'LEFT';
+                        that.event('swipe' + motion.direction.toLowerCase(), motion);
+                        that.event('swipe' + 'horizontal', motion);
 					} else {
-						motion.direction = motion.dist_y > 0 ? "DOWN" : "UP";
+						motion.direction = motion.dist_y > 0 ? 'DOWN' : 'UP';
+                        that.event('swipe' + motion.direction.toLowerCase(), motion);
+                        that.event('swipe' + 'vertical', motion);
 					}
 					that.event('swipe', motion);
 				}
 				clear();
 			}
 		}
+        function leave(e) {
+            if (event && config.END_ON_LEAVE) {   
+                end(e);
+            }
+        }
+        function timeout() {
+            if (event) {
+                getpos();
+				motion.pos_t_delta = pos.t - motion.pos_t_start;
+                if (motion.dist_u) {
+                    motion.vel_x = motion.dist_x / motion.pos_t_delta;
+                    motion.vel_y = motion.dist_y / motion.pos_t_delta;
+                    motion.vel_u = motion.dist_u / motion.pos_t_delta;
+                }
+                if (motion.pos_u_delta < config.HOLD_MAXDELTA) { // Hold Recognition Logic
+					that.event('hold', motion);
+				}
+            }
+        }
 		function detach() {
 			element.removeEventListener('touchstart', start, false);
 			element.removeEventListener('mousedown', start, false);
 			element.removeEventListener('touchmove', move, false);
 			element.removeEventListener('mousemove', move, false);
-			//element.removeEventListener('touchleave', end, false);
-			//element.removeEventListener('mouseleave', end, false);
+			element.removeEventListener('touchleave', leave, false);
+			element.removeEventListener('mouseleave', leave, false);
 			document.body.removeEventListener('touchcancel', end, false);
 			document.body.removeEventListener('mouseup', end, false);
 			document.body.removeEventListener('touchend', end, false);
@@ -287,8 +322,8 @@
 			element.addEventListener('mousedown', start, false);
 			element.addEventListener('touchmove', move, false);
 			element.addEventListener('mousemove', move, false);
-			//element.addEventListener('touchleave', end, false);
-			//element.addEventListener('mouseleave', end, false);
+			element.addEventListener('touchleave', leave, false);
+			element.addEventListener('mouseleave', leave, false);
 			document.body.addEventListener('touchcancel', end, false);
 			document.body.addEventListener('mouseup', end, false);
 			document.body.addEventListener('touchend', end, false);
@@ -302,6 +337,7 @@
 		style.webkitTapHighlightColor = 'rgba(0,0,0,0)';
 		clear();
 		attach();
+        /** @dict */
 		this.__eventlist__ = {};
 		this["detach"] = detach;
 		this["attach"] = attach;
@@ -315,6 +351,7 @@
 		},
 		event: function (event, arg) {
 			if (typeof (this.__eventlist__[event]) === 'function') {
+                arg.gesture = event;
 				try {
 					this.__eventlist__[event].call(this, arg);
 				}
@@ -363,6 +400,9 @@
                 break; 	
             case 'onpan':
                 addTouch(element, 'pan', prop);
+                break;
+            case 'onhold':
+                addTouch(element, 'hold', prop);
                 break;
             case 'parentNode':
                 prop.appendChild(element);
@@ -461,6 +501,9 @@
                 case 'onpan':
                 	addTouch(element, 'pan', prop);
                 	break;
+                case 'onhold':
+                    addTouch(element, 'hold', prop);
+                    break;
                 case 'parentNode':
                     prop.appendChild(element);
                     break;				
@@ -550,32 +593,36 @@
 			element.parentNode.removeChild(element);
 		return element;
 	}
-	//====/====/====/====/====/====/====/====/====/====/====/====/====/====/
     function createAlloy( key, properties ){
-        if(alloys[key]){
+        if (alloys[key]) {
             var alloy = new alloys[key](properties);
             alloy.alloyName = key;
             alloy.element.alloy = alloy;
             return alloy.element;
-        }else{
+        } else {
             throw new Error("Construction Error, alloy does not exist");   
         }
     }
     function defineAlloy( key, constructor){
         key = key.toLowerCase();
-        if(alloys[key])
+        if (alloys[key]) {
             throw new Error("Definition Error, alloy already exists!");
-        else
+        } else {
             alloys[key] = constructor;
+        }
     }
-	//====/====/====/====/====/====/====/====/====/====/====/====/====/====/
 	function addTouch(element, event , fn) {
-		if(!element.touches) {
+		if (!element.touches) {
 			new TouchListener(element);
 		}
-		element.touches.on(event, fn);
+        if (event && event.constructor === Array) {
+            for (var i = 0, l = event.length; i < l; i++) {
+                element.touches.on(event[i], fn);   
+            }
+        } else {
+            element.touches.on(event, fn);
+        }
 	}
-	//====/====/====/====/====/====/====/====/====/====/====/====/====/====/
 	window["Doom"] = {
         create: createElement,
         modify: modifyElement,
