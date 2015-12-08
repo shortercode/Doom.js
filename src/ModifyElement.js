@@ -89,7 +89,21 @@
            this.removeChild(this.firstChild);
         }
         for (var i = 0; i < node.length; i++) {
-            node[i] = attributes.child.apply(this, [node[i]]);
+            if (node[i] instanceof HTMLElement) { //child is already element
+                this.appendChild(node[i]);
+            }  else if (typeof node[i] === 'string') {
+                var temp = Doom.create({
+                    innerHTML: node[i]
+                });
+                while (temp.firstChild) {
+                    this.appendChild(temp.firstChild);
+                }
+            } else if (typeof node[i] === 'object') { //child is an element stub
+                node[i].parentNode = this;
+                node[i] = Doom.create(node[i]);
+            } else {
+                throw new Error('Child TypeError - ' + typeof node[i]);
+            }
         }
         return node;
     };
@@ -112,7 +126,7 @@
             node.parentNode = this;
             node = Doom.create(node);
         } else {
-            throw new Error('Child TypeError - ' + typeof prop);
+            throw new Error('Child TypeError - ' + typeof node[i]);
         }
         return node;
     };
