@@ -4,7 +4,7 @@
 
 A simple library for manipulating HTML elements with an awesomely simple syntax and no dependancies.
 
-*create an element?*
+*creating an element*
 ```
 Doom.create({
     tagName:'div',
@@ -32,7 +32,7 @@ Doom.create({
 });
 ``` 
 
-Child nodes can be recursivly created as well!
+Child nodes can be recursivly created as well
 
 ```
 Doom.create({
