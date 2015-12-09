@@ -171,24 +171,33 @@
      *  @param {Object<string, *>} obj
      */
     function modifyElement(obj) {
-        var element = obj["element"], i;
-        if (!element) {
+        var element = obj["element"], i, l;
+        if (!element) { // no element
             throw new Error("Element not defined");
-        }
-        if (obj["delay"]) {
-            i = obj["delay"];
-            obj["delay"] = null;
-            setTimeout(modifyElement, i, obj);
-            return;
-        }
-        for (i in obj) {
-            if (i in attributes) {
-                attributes[i].apply(element, [obj[i]]);
-            } else {
-                element[i] = obj[i];
+        } else if (element instanceof HTMLElement === false && element[0]) { // presume array of elements or similar
+            for (i = 0, l = ~~element.length; i < l; i++) { 
+                obj.element = element[i];
+                modifyElement(obj);
             }
+            return element;
+        } else if (element instanceof HTMLElement) {
+            if (obj["delay"]) {
+                i = obj["delay"];
+                obj["delay"] = null;
+                setTimeout(modifyElement, i, obj);
+                return;
+            }
+            for (i in obj) {
+                if (i in attributes) {
+                    attributes[i].apply(element, [obj[i]]);
+                } else {
+                    element[i] = obj[i];
+                }
+            }
+            return element;
+        } else {
+            throw new Error("Element TypeError - " + typeof element);
         }
-        return element;
     };
     Doom.modify = modifyElement;
 }())
