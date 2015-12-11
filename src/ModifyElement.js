@@ -31,6 +31,16 @@
     function (fn) {
         return Doom.touch(this, 'pan', fn);
     };
+    attributes.ontouchstart =
+    attributes.onTouchStart =
+    function (fn) {
+        return Doom.touch(this, 'touchstart', fn);
+    };
+    attributes.ontouchend =
+    attributes.onTouchEnd =
+    function (fn) {
+        return Doom.touch(this, 'touchend', fn);
+    };
 
     // element append
     attributes.parentNode =
