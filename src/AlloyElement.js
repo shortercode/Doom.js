@@ -1,7 +1,7 @@
 /** @dict */
 var alloys = {};
 function createAlloy( key, properties ){
-    key = key.toLowerCase();
+	key = key.toLowerCase();
 	if (alloys[key]) {
 		var alloy = new alloys[key](properties);
 		alloy.alloyName = key;

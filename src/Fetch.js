@@ -33,11 +33,13 @@
                 method = arg.method || DEFAULTS.method,
                 encode = arg.encode || DEFAULTS.encode,
                 timeout = arg.timeout || DEFAULTS.timeout,
-                credentials = arg.withCredentials || DEFAULTS.credentials,
+                credentials = typeof arg.withCredentials !== "undefined" ? arg.withCredentials : DEFAULTS.credentials,
                 headers = arg.headers || {};
             req.open(method, url);
             req.timeout = timeout;
-            req.withCredentials = credentials;
+            if (credentials) {
+                req.withCredentials = true;
+            }
             setHeaders(req, headers);
             req.onload = function() {
                 if (req.status < 400 && req.status >= 200) {

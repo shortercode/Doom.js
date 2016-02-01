@@ -119,13 +119,16 @@
     };
     attributes.child =
     function (node) {
+        if (this.children.length === 1 && node === this.firstChild) {
+            return;
+        }
         while (this.firstChild) {
            this.removeChild(this.firstChild);
         }
 
         if (node instanceof HTMLElement) { //child is already element
             this.appendChild(node);
-        }  else if (typeof node === 'string') {
+        } else if (typeof node === 'string') {
             var temp = Doom.create({
                 innerHTML: node
             });

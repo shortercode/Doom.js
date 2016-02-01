@@ -5,6 +5,16 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
         <title>Doom.js Gestures</title>
         <script src="../build/Doom.js"></script>
+        <style>
+            .logitem {
+                margin: 1px 0;
+                padding: 2px 30px;
+                font-size: 10px;
+            }
+            .logitem + .logitem {
+                border-top: 1px solid rgba(80,80,80,0.4);
+            }
+        </style>
         <script>
             function gesturebox(props) {
                 var that = this;
@@ -36,17 +46,17 @@
                         "pan"
                     ],
                     function (e) {
-                        if (that.log.lastChild && that.log.lastChild.className === e.gesture){
+                        if (that.log.lastChild && that.log.lastChild.alt === e.gesture){
                            Doom.modify({
                                element: that.log.lastChild,
                                innerHTML: (~~that.log.lastChild.innerHTML.split(" ")[0] + 1) + " " + e.gesture,
                            });
                         } else {
                             Doom.create({
-                                style: "border-top: 1px solid rgba(80,80,80,0.4); border-bottom: 1px solid rgba(80,80,80,0.4); margin: 1px 0; padding: 2px 30px; font-size: 10px;",
                                 innerHTML: "1 " + e.gesture,
                                 parentNode: that.log,
-                                className: e.gesture
+                                className: "logitem",
+                                alt: e.gesture
                             });
                             that.log.scrollTop = that.log.scrollHeight;
                         }

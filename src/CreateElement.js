@@ -2,7 +2,9 @@
     var attributes = {};
 
     // ignored property names
+    attributes.tag = 
     attributes.tagName =
+    attributes.alloy =
     attributes.alloyName =
     attributes.alloyProperties =
     attributes.copies =
@@ -73,7 +75,7 @@
                 this.style[i] = css[i];
             }
         } else if ( typeof css === 'string' ) {
-            this.style.cssText = css;
+            this.style.cssText += css;
         } else {
             throw new Error('Style TypeError - ' + typeof css);
         }
@@ -92,6 +94,13 @@
     function (node) {
         if (node instanceof HTMLElement) { //child is already element
             this.appendChild(node);
+        } else if (typeof node === 'string') {
+            var temp = Doom.create({
+                innerHTML: node
+            });
+            while (temp.firstChild) {
+                this.appendChild(temp.firstChild);
+            }
         } else if (typeof node === 'object') { //child is an element stub
             node.parentNode = this;
             node = createElement(node);
@@ -109,8 +118,6 @@
         }
     };
 
-
-
     /**
      *  Creates a HTML element from a stub
      *  @param {Object<string, *>} obj
@@ -120,8 +127,8 @@
         if (typeof obj !== 'object') {
             throw new Error('Element object structure is not defined');
         }
-        if (typeof obj.alloyName === 'string') { //hybrid html element, constructed using JS class
-            element = createAlloy( obj.alloyName, obj.alloyProperties || {} );
+        if (typeof obj.alloyName === 'string' || typeof obj.alloy === 'string') { //hybrid html element, constructed using JS class
+            element = createAlloy( obj.alloyName || obj.alloy, obj.alloyProperties || {} );
         } else { //normal html element, constructed using native method
             element = document.createElement(obj.tagName || 'div');
         }

@@ -1,4 +1,4 @@
-if (!Promise in window) {
+if (!window.Promise) {
     var errorObj = {e: null},
         STATE_INIT = 0,
         STATE_PEND = 1,
@@ -15,11 +15,6 @@ if (!Promise in window) {
             }
         };
     }
-    function deferredThrow(e) {
-        setTimeout(function () {
-            throw e;
-        }, 0);
-    }
     function Promise(resolver) {
         if (this instanceof Promise) {
             this.state = STATE_INIT;
@@ -33,6 +28,26 @@ if (!Promise in window) {
         } else {
             return new Promise(resolver);
         }
+    }
+    Promise.all = function (arr) {
+        var length = arr.length,
+            results = Array(length),
+            completed = 0,
+            resolver;
+        function completionHandler (arg) {
+            results[arr.indexOf(this)] = arg;
+            completed++;
+            if (completed === length) {
+                resolver(results);
+            }
+        }
+        return new Doom.Promise(function (res, rej) {
+            var i = length;
+            while (i--) {
+                arr.then(completionHandler, rej);
+            }
+            resolver = res;
+        });
     }
     Promise.prototype = {
         resolveWithResolver: function (resolver) {
@@ -178,5 +193,5 @@ if (!Promise in window) {
     };
     Doom.Promise = Promise;
 } else {
-    Doom.Promise = Promise;
+    Doom.Promise = window.Promise;
 }
