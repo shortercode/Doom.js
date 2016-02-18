@@ -13,7 +13,7 @@
                 TAP_MAXTIME: 500,
                 TAP_MAXDELTA: 20,
                 PAN_MINDELTA: 20,
-                HOLD_MINTIME: 1000,
+                HOLD_MINTIME: 500,
                 HOLD_MAXDELTA: 20,
                 SWIPE_MAXTIME: 400,
                 SWIPE_MINSPEED: 1,
