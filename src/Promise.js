@@ -29,7 +29,7 @@ if (!window.Promise) {
             return new Promise(resolver);
         }
     }
-    Promise.all = function (arr) {
+   /* Promise.all = function (arr) {
         var length = arr.length,
             results = Array(length),
             completed = 0,
@@ -48,7 +48,7 @@ if (!window.Promise) {
             }
             resolver = res;
         });
-    }
+    }*/
     Promise.prototype = {
         resolveWithResolver: function (resolver) {
             var promise = this, r;
