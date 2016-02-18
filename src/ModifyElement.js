@@ -187,6 +187,10 @@
         var element = obj["element"], i, l;
         if (!element) { // no element
             throw new Error("Element not defined");
+        } else if (typeof element === "string") {
+            element = Doom.search(element);
+            obj.element = element;
+            modifyElement(obj);
         } else if (element instanceof HTMLElement === false && element[0]) { // presume array of elements or similar
             for (i = 0, l = ~~element.length; i < l; i++) { 
                 obj.element = element[i];
