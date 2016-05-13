@@ -54,6 +54,9 @@
             req.onabort = function() {
                 reject(req);
             };
+            setTimeout(function() {
+                reject(req);
+            }, timeout);
             if (encode === "json") {
                 req.send(arg.data ? JSON.stringify(arg.data) : null);
             } else if (encode === "url") {
