@@ -54,9 +54,11 @@
             req.onabort = function() {
                 reject(req);
             };
-            setTimeout(function() {
-                reject(req);
-            }, timeout);
+            if (timeout !== 0) {
+                setTimeout(function() { // An alternative to setting req.ontimeout, which isn't widely supported
+                    req.abort();
+                }, timeout);
+            }
             if (encode === "json") {
                 req.send(arg.data ? JSON.stringify(arg.data) : null);
             } else if (encode === "url") {
