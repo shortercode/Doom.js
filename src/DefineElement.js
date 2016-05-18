@@ -1,7 +1,7 @@
 {
 	function define(name, props, inherits)
 	{
-		const prototype = Object.create((inherits || define.DIV).prototype);
+		const prototype = Object.create(HTMLDivElement.prototype);
 
 		for (let propertyName in props)
 		{
@@ -34,7 +34,4 @@
 
 		return document.registerElement(name, {prototype});
 	}
-
-	define.DIV = HTMLDivElement;
-	define.CANVAS = HTMLCanvasElement;
 }
