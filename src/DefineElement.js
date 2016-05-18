@@ -1,5 +1,5 @@
 {
-	function define(name, props, inherits)
+	function define(name, props)
 	{
 		const prototype = Object.create(HTMLDivElement.prototype);
 
