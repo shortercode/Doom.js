@@ -55,9 +55,8 @@
                 reject(req);
             };
             if (timeout !== 0) {
-                setTimeout(function() { // An alternative to setting req.ontimeout, which isn't widely supported
-                    req.abort();
-                }, timeout);
+                // An alternative to setting req.ontimeout, which isn't widely supported
+                setTimeout(req.abort, timeout);
             }
             if (encode === "json") {
                 req.send(arg.data ? JSON.stringify(arg.data) : null);
