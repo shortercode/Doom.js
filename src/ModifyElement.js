@@ -90,6 +90,21 @@
     function (cls) {
         this.classList.remove(cls);
     }
+    attributes.addClasses =
+    function (clsArr) {
+        for (var i = 0; i < clsArr.length; i++)
+            this.classList.add( clsArr[i] );
+    }
+    attributes.toggleClasses = 
+    function (clsArr) {
+        for (var i = 0; i < clsArr.length; i++)
+            this.classList.toggle( clsArr[i] );
+    }
+    attributes.removeClasses = 
+    function (clsArr) {
+        for (var i = 0; i < clsArr.length; i++)
+            this.classList.remove( clsArr[i] );
+    }
 
     // recursion
     attributes.childNodes =
