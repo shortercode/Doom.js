@@ -78,18 +78,26 @@
             throw new Error('Style TypeError - ' + typeof css);
         }
     };
+    // Accepts a single class or a space delimited list of classes
     attributes.addClass =
     function (cls) {
-        this.classList.add(cls);
+        var clsArr = cls.split(' ');
+        for (var i = 0; i < clsArr.length; i++)
+            this.classList.add( clsArr[i] );
     }
     attributes.toggleClass = 
     function (cls) {
-        this.classList.toggle(cls);
+        var clsArr = cls.split(' ');
+        for (var i = 0; i < clsArr.length; i++)
+            this.classList.toggle( clsArr[i] );
     }
     attributes.removeClass = 
     function (cls) {
-        this.classList.remove(cls);
+        var clsArr = cls.split(' ');
+        for (var i = 0; i < clsArr.length; i++)
+            this.classList.remove( clsArr[i] );
     }
+    // Accepts only arrays of classes
     attributes.addClasses =
     function (clsArr) {
         for (var i = 0; i < clsArr.length; i++)
