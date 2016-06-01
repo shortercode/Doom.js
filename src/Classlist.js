@@ -8,110 +8,139 @@
  * License: Dedicated to the public domain.
  *   See https://github.com/eligrey/classList.js/blob/master/LICENSE.md
  */
-if (!("classList" in document.createElement("_")) && ('Element' in window)) {
-    var classListProp = "classList",
-        protoProp = "prototype",
-        elemCtrProto = window.Element[protoProp],
-        objCtr = Object,
-        strTrim = String[protoProp].trim || function() {
-            return this.replace(/^\s+|\s+$/g, "");
-        },
-        arrIndexOf = Array[protoProp].indexOf || function(item) {
-            var i = 0,
-                len = this.length;
-            for (; i < len; i++) {
+if (!"indexOf" in Array.prototype) {
+	// This polyfill isn't 100% to spec, but will behave correctly in resonable use cases
+	// (ie not attempting to use it with something other than an array)
+	Object.defineProperty(Array.prototype, "indexOf", {
+		value: function indexOf (item, start) {
+			for (var i = +start || 0, l = this.length; i < l; i++) {
                 if (i in this && this[i] === item) {
                     return i;
                 }
             }
             return -1;
-        },
-        // Vendors: please allow content code to instantiate DOMExceptions
-        DOMEx = function(type, message) {
-            this.name = type;
-            this.code = DOMException[type];
-            this.message = message;
-        },
-        checkTokenAndGetIndex = function(classList, token) {
-            if (token === "") {
-                throw new DOMEx(
-                    "SYNTAX_ERR", "An invalid or illegal string was specified"
-                );
-            }
-            if (/\s/.test(token)) {
-                throw new DOMEx(
-                    "INVALID_CHARACTER_ERR", "String contains an invalid character"
-                );
-            }
-            return arrIndexOf.call(classList, token);
-        },
-        ClassList = function(elem) {
-            var trimmedClasses = strTrim.call(elem.getAttribute("class") || ""),
-                classes = trimmedClasses ? trimmedClasses.split(/\s+/) : [],
-                i = 0,
-                len = classes.length;
-            for (; i < len; i++) {
-                this.push(classes[i]);
-            }
-            this._updateClassName = function() {
-                elem.setAttribute("class", this.toString());
-            };
-        },
-        classListProto = ClassList[protoProp] = [],
-        classListGetter = function() {
-            return new ClassList(this);
-        };
-    // Most DOMException implementations don't allow calling DOMException's toString()
-    // on non-DOMExceptions. Error's toString() is sufficient here.
-    DOMEx[protoProp] = Error[protoProp];
-    classListProto.item = function(i) {
+		}
+	});
+}
+if (!"trim" in String.prototype) {
+	Object.defineProperty(String.prototype, "trim", {
+		value: function trim () {
+			return this.replace(/^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/g, '');
+		}
+	});
+}
+if (!("classList" in document.createElement("_")) && ('Element' in window)) {
+	function DOMEx(type, message) {
+        this.name = type;
+        this.code = DOMException[type];
+        this.message = message;
+    }
+
+	DOMEx.prototype = Error.prototype;
+	
+	function checkTokenAndGetIndex(classList, token) {
+        if (token === "") {
+            throw new DOMEx(
+                "SYNTAX_ERR", "The token provided must not be empty"
+            );
+        }
+        if (/\s/.test(token)) {
+            throw new DOMEx(
+                "INVALID_CHARACTER_ERR", "The token provided ('" + token + "') contains HTML space characters, which are not valid in tokens"
+            );
+        }
+        return classList.indexOf(token);
+    }
+	
+	function updateFromClassName(classList, className) {
+		var trimmedClasses = className.trim(),
+            classes = trimmedClasses ? trimmedClasses.split(/\s+/) : [];
+		classList.length = 0;
+        for (var i = 0, l = classes.length; i < l; i++) {
+            classList.push(classes[i]);
+        }
+	}
+
+    function ClassList(element) {
+        updateFromClassName(this, element.className);
+		this._updateClassName = function () {
+			element.className = this + "";
+		};
+    }
+	
+    ClassList.prototype = [];
+	
+	ClassList.prototype.item = function(i) {
         return this[i] || null;
     };
-    classListProto.contains = function(token) {
-        token += "";
-        return checkTokenAndGetIndex(this, token) !== -1;
+	
+    ClassList.prototype.contains = function(token) {
+        return checkTokenAndGetIndex(this, token + "") !== -1;
     };
-    classListProto.add = function(token) {
-        token += "";
-        if (checkTokenAndGetIndex(this, token) === -1) {
-            this.push(token);
-            this._updateClassName();
-        }
+	
+    ClassList.prototype.add = function() {
+		var update = false;
+		for (var i = 0, l = arguments.length, token; i < l; i++) {
+			token = arguments[i] + "";
+			if (checkTokenAndGetIndex(this, token) === -1) {
+	            this.push(token);
+				update = true;
+	        }
+		}
+        update && this._updateClassName(this);
     };
-    classListProto.remove = function(token) {
-        var index;
-        token += "";
-        index = checkTokenAndGetIndex(this, token);
-        while (index !== -1) {
-            this.splice(index, 1);
-            this._updateClassName();
-            index = checkTokenAndGetIndex(this, token);
-        }
+	
+    ClassList.prototype.remove = function() {
+		for (var i = 0, l = arguments.length, token, index; i < l; i++) {
+			token = arguments[i] + "";
+			index = checkTokenAndGetIndex(this, token);
+			while (index !== -1) {
+	            this.splice(index, 1);
+	            index = checkTokenAndGetIndex(this, token);
+	        }
+		}
+		this._updateClassName();
     };
-    classListProto.toggle = function(token) {
+	
+    ClassList.prototype.toggle = function(token) {
         token += "";
         var result = this.contains(token);
         this[(result ? "remove" : "add")](token);
         return !result;
     };
-    classListProto.toString = function() {
+	
+    ClassList.prototype.toString = function() {
         return this.join(" ");
     };
-    if (objCtr.defineProperty) {
+	
+    function classListGetter() {
+		var classList = new ClassList(this);
+		Object.defineProperty(this, "classList", {
+			get: function () {
+				updateFromClassName(classList, this.className);
+				return classList;
+			}
+		});
+		return classList;
+    }
+    
+    if (Object.defineProperty) {
         var classListPropDesc = {
             get: classListGetter,
             enumerable: true,
             configurable: true
         };
         try {
-            objCtr.defineProperty(elemCtrProto, classListProp, classListPropDesc);
+            Object.defineProperty(Element.prototype, 'classList', classListPropDesc);
         } catch (ex) { // IE 8 doesn't support enumerable:true
             if (ex.number === -0x7FF5EC54) {
                 classListPropDesc.enumerable = false;
-                objCtr.defineProperty(elemCtrProto, classListProp, classListPropDesc);
+                Object.defineProperty(Element.prototype, 'classList', classListPropDesc);
             }
         }
-    } else if (objCtr[protoProp].__defineGetter__) {
-        elemCtrProto.__defineGetter__(classListProp, classListGetter);
-    }	
+    } else if (Object.prototype.__defineGetter__) {
+        elemCtrProto.__defineGetter__('classList', classListGetter);
+    } else {
+		console.warn("Failed to add classlist polyfill");
+	}
 }
