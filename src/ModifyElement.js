@@ -81,37 +81,31 @@
     // Accepts a single class or a space delimited list of classes
     attributes.addClass =
     function (cls) {
-        var clsArr = cls.split(' ');
-        for (var i = 0; i < clsArr.length; i++)
-            this.classList.add( clsArr[i] );
+		this.classList.add.apply(this.classList, cls.split(' ')); // Oh magical spread operator, I wish you were part of ES5
     }
-    attributes.toggleClass = 
+    attributes.toggleClass =
     function (cls) {
         var clsArr = cls.split(' ');
-        for (var i = 0; i < clsArr.length; i++)
+        for (var i = 0, l = clsArr.length; i < l; i++)
             this.classList.toggle( clsArr[i] );
     }
-    attributes.removeClass = 
+    attributes.removeClass =
     function (cls) {
-        var clsArr = cls.split(' ');
-        for (var i = 0; i < clsArr.length; i++)
-            this.classList.remove( clsArr[i] );
+        this.classList.remove.apply(this.classList, cls.split(' '));
     }
     // Accepts only arrays of classes
     attributes.addClasses =
     function (clsArr) {
-        for (var i = 0; i < clsArr.length; i++)
-            this.classList.add( clsArr[i] );
+        this.classList.add.apply(this.classList, clsArr);
     }
-    attributes.toggleClasses = 
+    attributes.toggleClasses =
     function (clsArr) {
-        for (var i = 0; i < clsArr.length; i++)
+        for (var i = 0, l = clsArr.length; i < l; i++)
             this.classList.toggle( clsArr[i] );
     }
-    attributes.removeClasses = 
+    attributes.removeClasses =
     function (clsArr) {
-        for (var i = 0; i < clsArr.length; i++)
-            this.classList.remove( clsArr[i] );
+        this.classList.remove.apply(this.classList, clsArr);
     }
 
     // recursion
@@ -188,7 +182,7 @@
             this.removeChild(nodes[i]);
         }
     }
-    attributes.innerHTML = 
+    attributes.innerHTML =
     function (str) {
         if (this.innerHTML !== str) {
             this.innerHTML = str
@@ -215,7 +209,7 @@
             obj.element = element;
             modifyElement(obj);
         } else if (element instanceof HTMLElement === false && element[0]) { // presume array of elements or similar
-            for (i = 0, l = ~~element.length; i < l; i++) { 
+            for (i = 0, l = ~~element.length; i < l; i++) {
                 obj.element = element[i];
                 modifyElement(obj);
             }
