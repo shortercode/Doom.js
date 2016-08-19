@@ -178,12 +178,10 @@ if (!window.Promise) {
             ret.resolvehandler = res;
             ret.rejectionhandler = rej;
             this.subscriberqueue.push(ret);
-            if (this.settledValue) {
-                if (this.state === STATE_RSLV) {
-                    this.fulfill(this.settledValue);
-                } else {
-                    this.reject(this.settledValue);
-                }
+            if (this.state === STATE_RSLV) {
+                this.fulfill(this.settledValue);
+            } else if (this.state === STATE_RJCT) {
+                this.reject(this.settledValue);
             }
             return ret;
         },
