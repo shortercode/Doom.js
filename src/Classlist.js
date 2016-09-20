@@ -8,7 +8,7 @@
  * License: Dedicated to the public domain.
  *   See https://github.com/eligrey/classList.js/blob/master/LICENSE.md
  */
-if (!"indexOf" in Array.prototype) {
+if (!("indexOf" in Array.prototype)) {
 	// This polyfill isn't 100% to spec, but will behave correctly in resonable use cases
 	// (ie not attempting to use it with something other than an array)
 	Object.defineProperty(Array.prototype, "indexOf", {
@@ -22,7 +22,7 @@ if (!"indexOf" in Array.prototype) {
 		}
 	});
 }
-if (!"trim" in String.prototype) {
+if (!("trim" in String.prototype)) {
 	Object.defineProperty(String.prototype, "trim", {
 		value: function trim () {
 			return this.replace(/^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/g, '');
