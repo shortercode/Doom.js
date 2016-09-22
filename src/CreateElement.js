@@ -1,5 +1,6 @@
 (function(){
     var attributes = {};
+	var referenceObject = null;
 
     // ignored property names
     attributes.tag = 
@@ -11,6 +12,13 @@
     function () {
         return;
     };
+	
+	// reference mapping
+	attributes.ref =
+	attributes.reference =
+	function (label) {
+		referenceObject[label] = this;
+	};
 
     // touch events
     attributes.onTap =
@@ -122,16 +130,26 @@
      *  Creates a HTML element from a stub
      *  @param {Object<string, *>} obj
      */
-    function createElement(obj) {
+    function createElement(obj, ref) {
         var i, element;
+		
         if (typeof obj !== 'object') {
             throw new Error('Element object structure is not defined');
         }
+		
+		if (ref) {
+			if (typeof ref !== 'object') {
+				throw new Error('Reference object is not an object');
+			}
+			referenceObject = ref;
+		}
+		
         if (typeof obj.alloyName === 'string' || typeof obj.alloy === 'string') { //hybrid html element, constructed using JS class
             element = createAlloy( obj.alloyName || obj.alloy, obj.alloyProperties || {} );
         } else { //normal html element, constructed using native method
             element = document.createElement(obj.tagName || 'div');
         }
+		
         for (i in obj) {
             if (i in attributes) {
                 attributes[i].apply(element, [obj[i]]);
@@ -139,6 +157,10 @@
                 element[i] = obj[i];
             }
         }
+		
+		if (ref)
+			referenceObject = null;
+		
         return element;
     };
     Doom.create = createElement;
