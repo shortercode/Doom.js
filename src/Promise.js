@@ -154,23 +154,29 @@ if (!window.Promise) {
             }
         },
         fulfill: function (value) {
+            function deferredCallback(sub) {
+                return function() {
+                    sub.resolveCallback(value);
+                    promise.settledValue = value;
+                };
+            }
             var promise = this, subscriber;
             while (this.subscriberqueue.length) {
                 subscriber = this.subscriberqueue.shift();
-                setTimeout(function () {
-                    subscriber.resolveCallback(value);
-                    promise.settledValue = value;
-                }, 0);
+                setTimeout(deferredCallback(subscriber), 0);
             }
         },
         reject: function (value, sync) {
+            function deferredCallback(sub) {
+                return function() {
+                    sub.rejectCallback(value);
+                    promise.settledValue = value;
+                };
+            }
             var promise = this, subscriber;
             while (this.subscriberqueue.length) {
                 subscriber = this.subscriberqueue.shift();
-                setTimeout(function () {
-                    subscriber.rejectCallback(value);
-                    promise.settledValue = value;
-                }, 0);
+                setTimeout(deferredCallback(subscriber), 0);
             }
         },
         then: function (res, rej) {
@@ -178,12 +184,10 @@ if (!window.Promise) {
             ret.resolvehandler = res;
             ret.rejectionhandler = rej;
             this.subscriberqueue.push(ret);
-            if (this.settledValue) {
-                if (this.state === STATE_RSLV) {
-                    this.fulfill(this.settledValue);
-                } else {
-                    this.reject(this.settledValue);
-                }
+            if (this.state === STATE_RSLV) {
+                this.fulfill(this.settledValue);
+            } else if (this.state === STATE_RJCT) {
+                this.reject(this.settledValue);
             }
             return ret;
         },
