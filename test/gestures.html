@@ -17,28 +17,28 @@
         </style>
         <script>
             function gesturebox(props) {
-                var that = this;
+				var elements = {};
                 this.element = Doom.create({
+					refMap: elements,
                     childNodes: [
                         {
                             style: "background-color: rgb(240,240,240); transition: all ease-in-out 0.1s; position: relative;max-width: 400px; margin: 10px auto; height: 300px; border-radius: 2px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);",
+							ref: "touchbox",
                             childNodes: [
                                 {
-                                    style: "display: none; position: absolute;"   
+                                    style: "display: none; position: absolute;"
                                 }
                             ]
                         },
                         {
+							ref: "log",
                             style: "background-color: rgb(250,230,160); overflow-y: scroll; max-width: 400px; margin: 10px auto; height: 300px; padding: 40px 0px; border-radius: 2px; box-shadow: 0 2px 12px rgba(0, 0, 0, 0.25);"
                         }
-                    ],
-                    style: ""
+                    ]
                 });
-                this.touchbox = this.element.childNodes[0];
-                this.log = this.element.childNodes[1];
 
                 Doom.touch(
-                    this.touchbox, 
+                    elements.touchbox,
                     [
                         "tap",
                         "swipe",
@@ -46,36 +46,37 @@
                         "pan"
                     ],
                     function (e) {
-                        if (that.log.lastChild && that.log.lastChild.alt === e.gesture){
+						var log = elements.log;
+                        if (log.lastChild && log.lastChild.alt === e.gesture){
                            Doom.modify({
-                               element: that.log.lastChild,
-                               innerHTML: (~~that.log.lastChild.innerHTML.split(" ")[0] + 1) + " " + e.gesture,
+                               element: log.lastChild,
+                               innerHTML: (~~log.lastChild.innerHTML.split(" ")[0] + 1) + " " + e.gesture,
                            });
                         } else {
                             Doom.create({
                                 innerHTML: "1 " + e.gesture,
-                                parentNode: that.log,
+                                parentNode: log,
                                 className: "logitem",
                                 alt: e.gesture
                             });
-                            that.log.scrollTop = that.log.scrollHeight;
+                            log.scrollTop = log.scrollHeight;
                         }
                     }
                 );
                 
                 Doom.touch(
-                    this.touchbox, 
+                    elements.touchbox,
                     "touchstart",
                     function (e) {
-                        that.touchbox.style.backgroundColor = "white";
+                        elements.touchbox.style.backgroundColor = "white";
                     }
                 );
                 
                 Doom.touch(
-                    this.touchbox, 
+                    elements.touchbox,
                     "touchend",
                     function (e) {
-                        that.touchbox.style.backgroundColor = "rgb(240,240,240)";
+                        elements.touchbox.style.backgroundColor = "rgb(240,240,240)";
                     }
                 );
             }
