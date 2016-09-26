@@ -1,8 +1,9 @@
 (function(){
     var attributes = {};
+	var referenceStack = [];
 
     // ignored property names
-    attributes.tag = 
+    attributes.tag =
     attributes.tagName =
     attributes.alloy =
     attributes.alloyName =
@@ -11,6 +12,17 @@
     function () {
         return;
     };
+	
+	// reference mapping
+	attributes.ref =
+	attributes.reference =
+	function (label) {
+		if (!referenceStack[0])
+			throw new Error("No reference map defined for \"" + label + "\"");
+		if (referenceStack[0][label])
+			throw new Error("Label \"" + label + "\" already defined for reference map");
+		referenceStack[0][label] = this;
+	};
 
     // touch events
     attributes.onTap =
@@ -123,15 +135,31 @@
      *  @param {Object<string, *>} obj
      */
     function createElement(obj) {
-        var i, element;
+        var i, element, ref;
+		
         if (typeof obj !== 'object') {
             throw new Error('Element object structure is not defined');
         }
+		
+		// NOTE to control the referece stack properly during recursion we need
+		// to know if a referenceMap was defined in this call to createElement,
+		// so that we can remove it at the correct time
+		
+		ref = obj["refMap"] || obj["referenceMap"];
+		
+		if (ref) {
+			if (typeof ref !== 'object') {
+				throw new Error('Reference object is not an object');
+			}
+			referenceStack.unshift(ref);
+		}
+		
         if (typeof obj.alloyName === 'string' || typeof obj.alloy === 'string') { //hybrid html element, constructed using JS class
             element = createAlloy( obj.alloyName || obj.alloy, obj.alloyProperties || {} );
         } else { //normal html element, constructed using native method
             element = document.createElement(obj.tagName || 'div');
         }
+		
         for (i in obj) {
             if (i in attributes) {
                 attributes[i].apply(element, [obj[i]]);
@@ -139,6 +167,12 @@
                 element[i] = obj[i];
             }
         }
+		
+		// only remove from the stack if we added during this call
+		
+		if (ref)
+			referenceStack.shift();
+		
         return element;
     };
     Doom.create = createElement;
