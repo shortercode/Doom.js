@@ -188,6 +188,60 @@
             this.innerHTML = str
         }
     }
+	attributes.partialNoCache =
+	function (bool) {
+		if (!this.partial) {
+			this.partial = {
+				href: null
+			};
+		// if enabling nocache then clear the existing cache
+		this.partial.map = bool ? {} : this.partial.map;
+		this.partial.noCache = !!bool;
+	};
+	attributes.partial =
+	function (url) {
+		// quick reference for current elements partial object
+		var part = this.partial;
+		// if no partial object create one
+		if (!part) {
+			part = this.partial = {
+				href: url,
+				map: {},
+				noCache: false
+			};
+		// else check if the partial url has actually changed
+		} else if (part.href !== url) {
+			// if nocache is enabled then don't store the old template
+			if (part.nocache === false)
+			{
+				// try and reuse the previous fragment if possible, else create a new one
+				var fragment = part.map[part.href] || document.createDocumentFragment();
+				// move all child elements into the fragment
+				while (this.firstChild)
+					fragment.appendChild(this.firstChild);
+				// store the fragment in the partial map
+				part.map[part.href] = fragment;
+			}
+		// if no change, bail
+		} else {
+			return;
+		}
+		
+		// update the partial url with the new one
+		part.href = url;
+		
+		// if theres a cached fragment then append it
+		if (part.map[url]) {
+			this.appendChild(part.map[url]);
+		// else request the partial content and append it
+		} else {
+			var element = this;
+			Doom.fetch(url)
+			.then(function (res) {
+				element.innerHTML = res;
+			});
+		}
+	};
 
     // data attributes
     attributes.dataset =
