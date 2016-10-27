@@ -1,5 +1,4 @@
 (function(){
-    var isAndroid = navigator.userAgent.match(/Android/i);
 /**
      * Touch Listener Class
      * Wraps recognisor logic for all gesture types
@@ -20,7 +19,6 @@
                 SWIPE_MINSPEED: 1,
                 END_ON_LEAVE: false,
                 PREVENT_DBL_CLICK: false,
-                ANDRD_FIX_TOUCH_START_PREVENT_DFLT: false, // bug: https://code.google.com/p/android/issues/detail?id=19827
                 TOUCH: 'ontouchstart' in window,
                 MOUSE: true
             },
@@ -114,9 +112,6 @@
                 motion.pos_u_delta = 0;
                 timer = setTimeout(timeout, config.HOLD_MINTIME);
                 that.event('touchstart', motion);
-                if (config.ANDRD_FIX_TOUCH_START_PREVENT_DFLT && event.type === 'touchstart') {
-                    event.preventDefault();
-                }
             }
         }
         function move(e) {
@@ -262,9 +257,6 @@
         on: function (event, func) {
             if (event === "tap") {
                 this.CONFIG.PREVENT_DBL_CLICK = true;
-            }
-            if (event === "pan" && isAndroid) {
-                this.CONFIG.ANDRD_FIX_TOUCH_START_PREVENT_DFLT = true;
             }
             this.__eventlist__[event.toLowerCase()] = func;
         },
