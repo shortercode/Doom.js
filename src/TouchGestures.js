@@ -95,8 +95,8 @@
             timer = null;
         }
         function getpos() {
-            pos.x = config.TOUCH ? event.changedTouches[0].pageX : event.pageX;
-            pos.y = config.TOUCH ? event.changedTouches[0].pageY : event.pageY;
+            pos.x = "pageX" in event ? event.pageX : event.changedTouches[0].pageX;
+            pos.y = "pageY" in event ? event.pageY : event.changedTouches[0].pageY;
             pos.t = event.timeStamp;
         }
         function start(e) {
