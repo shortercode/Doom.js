@@ -55,6 +55,25 @@
     function (fn) {
         return Doom.touch(this, 'touchend', fn);
     };
+	
+	// mutation events
+	attributes.onConnected =
+    attributes.onconnected =
+    function (fn) {
+        return Doom.addMutationEvent(this, 'connect', fn);
+    };
+	
+	attributes.onDisconnected =
+    attributes.ondisconnected =
+    function (fn) {
+        return Doom.addMutationEvent(this, 'disconnect', fn);
+    };
+	
+	attributes.onAdopted =
+    attributes.onadopted =
+    function (fn) {
+        return Doom.addMutationEvent(this, 'adopt', fn);
+    };
 
     // element append
     attributes.parentNode =
