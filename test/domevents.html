@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<script src="../build/Doom.js"></script>
+		<script>
+			window.onload = () => {
+				let timeRef = [];
+				let div = Doom.create({
+					onAdopted: e => {
+						let now = new Date;
+						let from = timeRef.pop();
+						
+						Doom.create({
+							textContent: `Element adopted at ${now.toLocaleTimeString()} with delay ${from ? +now.getTime() - from : "void"}`,
+							parent: div
+						});
+					},
+					onConnected: e => {
+						let now = new Date;
+						let from = timeRef.pop();
+						
+						Doom.create({
+							textContent: `Element connected at ${now.toLocaleTimeString()} with delay ${from ? +now.getTime() - from : "void"}`,
+							parent: div
+						});
+					},
+					onDisconnected: e => {
+						let now = new Date;
+						let from = timeRef.pop();
+						
+						Doom.create({
+							textContent: `Element disconnected at ${now.toLocaleTimeString()} with delay ${from ? +now.getTime() - from : "void"}`,
+							parent: div
+						});
+					}
+				});
+				
+				let container = Doom.create({
+					child: div
+				});
+				
+				markTime(3);
+				
+				function markTime (n = 1) {
+					while (n--)
+						timeRef.unshift(+Date.now());
+				}
+				
+				function remove () {
+					markTime(1);
+					Doom.create({
+						parent: div,
+						textContent: "remove"
+					});
+					container.remove();
+				}
+				
+				function append () {
+					markTime(1);
+					Doom.create({
+						parent: div,
+						textContent: "append"
+					});
+					document.body.appendChild(container);
+				}
+				
+				function move () {
+					markTime(1);
+					Doom.create({
+						parent: div,
+						textContent: "move"
+					});
+					container.appendChild(div);
+				}
+				
+				let i = 30;
+				
+				setTimeout(() => append(), i * 100);
+				
+				while (i--) {
+					setTimeout(() => append(), i * 100);
+					//setTimeout(() => move(), i * 100 + 30);
+					setTimeout(() => remove(), i * 100 + 60);
+				}
+			};
+		</script>
+	</head>
+</html>
