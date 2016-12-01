@@ -1,3 +1,7 @@
+# WARNING - THIS PAGE IS OUT OF DATE
+
+We are planning to revamp our documentation soon, in the mean time please refer to the code *wince*
+
 HTMLelement create(Object propertyMap)
 
 - creates a HTMLelement with a given set of properties.
