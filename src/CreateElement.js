@@ -140,6 +140,29 @@
         }
         return node;
     };
+	attributes.partialNoCache =
+	function (bool) {
+		if (!this.partial)
+			this.partial = {
+				map: {},
+				href: null
+			};
+		this.partial.noCache = !!bool;
+	}
+	attributes.partial =
+	function (url) {
+		var element = this;
+		if (!this.partial)
+			this.partial = {
+				noCache: false
+			};
+		this.partial.href = url;
+		this.partial.map = {};
+		Doom.fetch(url)
+		.then(function (res) {
+			element.innerHTML = res;
+		});
+	};
 
     // data attributes
     attributes.dataset =
