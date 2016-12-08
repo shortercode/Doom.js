@@ -194,6 +194,7 @@
 			this.partial = {
 				href: null
 			};
+        }
 		// if enabling nocache then clear the existing cache
 		this.partial.map = bool ? {} : this.partial.map;
 		this.partial.noCache = !!bool;
@@ -212,7 +213,7 @@
 		// else check if the partial url has actually changed
 		} else if (part.href !== url) {
 			// if nocache is enabled then don't store the old template
-			if (part.nocache === false)
+			if (part.noCache === false)
 			{
 				// try and reuse the previous fragment if possible, else create a new one
 				var fragment = part.map[part.href] || document.createDocumentFragment();
