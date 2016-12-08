@@ -174,6 +174,7 @@ if (!window.Promise) {
                 };
             }
             var promise = this, subscriber;
+            if (!this.subscriberqueue.length) throw value;
             while (this.subscriberqueue.length) {
                 subscriber = this.subscriberqueue.shift();
                 setTimeout(deferredCallback(subscriber), 0);

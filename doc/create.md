@@ -1,3 +1,7 @@
+# WARNING - THIS PAGE IS OUT OF DATE
+
+### We are planning to revamp our documentation soon, in the mean time please refer to the code...
+
 HTMLelement create(Object propertyMap)
 
 - creates a HTMLelement with a given set of properties.
@@ -43,34 +47,36 @@ New properties:
 Known issues:
 
 - setting more than one of the following: [child/childNodes/innerHTML] will cause irregular behaviour, as these arguments all overwrite the elements children
+
 Source: 
 
-    function createElement(obj){
-        var i,
-            prop,
-            element;
-        if (typeof obj !== 'object') {
-            throw new Error('Element object structure is not defined');
+```javascript
+function createElement(obj){
+    var i,
+        prop,
+        element;
+    if (typeof obj !== 'object') {
+        throw new Error('Element object structure is not defined');
+    }
+    if (typeof obj.alloyName === 'string') { 
+        //hybrid html element, constructed using JS class
+        element = createAlloy( obj["alloyName"], obj["alloyProperties"] || {} );
+    } else { 
+        if (typeof obj.tagName === 'string') { 
+            //normal html element, constructed using native method
+            element = document.createElement(obj.tagName);
+        } else { // no construction method 
+            element = document.createElement('div'); //default to div
         }
-        if (typeof obj.alloyName === 'string') { 
-            //hybrid html element, constructed using JS class
-            element = createAlloy( obj["alloyName"], obj["alloyProperties"] || {} );
-        } else { 
-            if (typeof obj.tagName === 'string') { 
-                //normal html element, constructed using native method
-                element = document.createElement(obj.tagName);
-            } else { // no construction method 
-                element = document.createElement('div'); //default to div
-            }
-        }
-        for (i in obj) {
-            prop = obj[i];
-            switch (i) {
-            case 'tagName': 
-            case 'alloyName':
-            case 'alloyProperties':
-            case 'copies':
-                break; //ignore 
+    }
+    for (i in obj) {
+        prop = obj[i];
+        switch (i) {
+        case 'tagName': 
+        case 'alloyName':
+        case 'alloyProperties':
+        case 'copies':
+            break; //ignore 
             case 'ontap':
                 addTouch(element, 'tap', prop);
                 break;	
@@ -135,3 +141,4 @@ Source:
         }
         return element;
     }
+```
