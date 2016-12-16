@@ -12,7 +12,7 @@ HTMLelement create(Object propertyMap)
 Properties with custom behaviour:
 
 - tagName (String tagName)
-specifies the type of HTMLelement to create. 
+specifies the type of HTMLelement to create.
 defaults to 'div'
 overridden by the alloyName property
 
@@ -25,7 +25,7 @@ can be passed a string of the same syntax as an element's style property e.g. "c
 alternatively a map of properties keyed with css rules can be used e.g. {color: "rgb(255,0,0)", fontSize: "30px"}
 
 - childNodes (Array[HTMLelement / Object] children )
-sets the child nodes of the element, with the order given in the array 
+sets the child nodes of the element, with the order given in the array
 passing a HTMLelement will cause it to be moved to the new element
 passing a propertyMap will recursively call Doom.create and append it to the new element
 
@@ -47,98 +47,3 @@ New properties:
 Known issues:
 
 - setting more than one of the following: [child/childNodes/innerHTML] will cause irregular behaviour, as these arguments all overwrite the elements children
-
-Source: 
-
-```javascript
-function createElement(obj){
-    var i,
-        prop,
-        element;
-    if (typeof obj !== 'object') {
-        throw new Error('Element object structure is not defined');
-    }
-    if (typeof obj.alloyName === 'string') { 
-        //hybrid html element, constructed using JS class
-        element = createAlloy( obj["alloyName"], obj["alloyProperties"] || {} );
-    } else { 
-        if (typeof obj.tagName === 'string') { 
-            //normal html element, constructed using native method
-            element = document.createElement(obj.tagName);
-        } else { // no construction method 
-            element = document.createElement('div'); //default to div
-        }
-    }
-    for (i in obj) {
-        prop = obj[i];
-        switch (i) {
-        case 'tagName': 
-        case 'alloyName':
-        case 'alloyProperties':
-        case 'copies':
-            break; //ignore 
-            case 'ontap':
-                addTouch(element, 'tap', prop);
-                break;	
-            case 'onswipe':
-                addTouch(element, 'swipe', prop);
-                break; 	
-            case 'onpan':
-                addTouch(element, 'pan', prop);
-                break;
-            case 'onhold':
-                addTouch(element, 'hold', prop);
-                break;
-            case 'parentNode':
-                prop.appendChild(element);
-                break;
-            case 'style':
-                if (typeof prop === 'object') {
-                    for( i in prop ){
-                        element.style[i] = prop[i];
-                    }
-                } else if ( typeof prop === 'string' ) {
-                    element.style.cssText = prop;
-                } else {
-                    throw new Error('Style TypeError - ' + typeof prop);
-                }
-                break;
-            case 'dataset':
-                for (i in prop) {
-                    element.dataset[i] = prop[i];
-                }
-                break;
-            case 'childNodes':
-                for (i = 0; i < prop.length; i++) {
-                    if (prop[i] instanceof HTMLElement) { 
-                        //child is already element
-                        element.appendChild(prop[i]);
-                    } else if (typeof prop[i] === 'object') { 
-                        //child is an element stub
-                        prop[i].parentNode = element;
-                        prop[i] = createElement(prop[i]);
-                    } else {
-                        throw new Error('Child ' + i + ' TypeError - ' + typeof prop[i]);
-                    }
-                }
-                break;
-            case 'child':
-                if (prop instanceof HTMLElement) { 
-                    //child is already element
-                    element.appendChild(prop);
-                } else if (typeof prop === 'object') { 
-                    //child is an element stub
-                    prop.parentNode = element;
-                    prop = createElement(prop);
-                } else {
-                    throw new Error('Child TypeError - ' + typeof prop);
-                }
-                break;
-            default:
-                element[i] = prop;
-                break;
-            }
-        }
-        return element;
-    }
-```
