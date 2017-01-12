@@ -143,5 +143,12 @@
     if (ref) referenceStack.shift();
     return element;
   };
+	function defineAttribute (key, method) {
+		if (key in attributes)
+			throw new Error(key + " is already defined");
+
+		attributes[key] = method;
+	}
+	createElement.define = defineAttribute;
   Doom.create = createElement;
 }());

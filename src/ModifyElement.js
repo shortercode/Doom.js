@@ -227,10 +227,10 @@
 		} else {
 			return;
 		}
-		
+
 		// update the partial url with the new one
 		part.href = url;
-		
+
 		// if theres a cached fragment then append it
 		if (part.map[url]) {
 			this.appendChild(part.map[url]);
@@ -288,5 +288,12 @@
             throw new Error("Element TypeError - " + typeof element);
         }
     };
+		function defineAttribute (key, method) {
+			if (key in attributes)
+				throw new Error(key + " is already defined");
+
+			attributes[key] = method;
+		}
+		modifyElement.define = defineAttribute;
     Doom.modify = modifyElement;
 }())
