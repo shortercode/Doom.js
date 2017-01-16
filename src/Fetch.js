@@ -6,7 +6,7 @@
         credentials: true,
         headers: {
             'Accept': '*/*',
-            'Content-type': 'application/json;charset=UTF-8'
+            'Content-type': 'text/plain;charset=UTF-8'
         }
     };
     function urlEncode(obj) {
