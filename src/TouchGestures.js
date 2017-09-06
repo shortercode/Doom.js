@@ -214,14 +214,14 @@
             if (config.TOUCH) {
                 element.removeEventListener('touchstart', start, false);
                 element.removeEventListener('touchmove', move, false);
-                document.body.removeEventListener('touchcancel', end, false);
-                document.body.removeEventListener('touchend', end, false);
+                window.removeEventListener('touchcancel', end, false);
+                window.removeEventListener('touchend', end, false);
                 element.removeEventListener('touchleave', leave, false);
             }
             if (config.MOUSE) {
                 element.removeEventListener('mousedown', start, false);
                 element.removeEventListener('mousemove', move, false);
-                document.body.removeEventListener('mouseup', end, false);
+                window.removeEventListener('mouseup', end, false);
                 element.removeEventListener('mouseleave', leave, false);
             }
         }
@@ -229,14 +229,14 @@
             if (config.TOUCH) {
                 element.addEventListener('touchstart', start, false);
                 element.addEventListener('touchmove', move, false);
-                document.body.addEventListener('touchcancel', end, false);
-                document.body.addEventListener('touchend', end, false);
+                window.addEventListener('touchcancel', end, false);
+                window.addEventListener('touchend', end, false);
                 element.addEventListener('touchleave', leave, false);
             }
             if (config.MOUSE) {
                 element.addEventListener('mousedown', start, false);
                 element.addEventListener('mousemove', move, false);
-                document.body.addEventListener('mouseup', end, false);
+                window.addEventListener('mouseup', end, false);
                 element.addEventListener('mouseleave', leave, false);
             }
         }
